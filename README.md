@@ -31,6 +31,8 @@
 ### macOS / Linux の場合
 
 ```bash
+git clone https://github.com/noa-ai-225/note-dashboard-Halley.git
+cd note-dashboard-Halley
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
