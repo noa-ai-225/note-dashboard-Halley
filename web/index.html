@@ -693,8 +693,20 @@
         </div>
         <div class="kpi-sub" id="builtin-next-run">次回観測予定: -</div>
 
+        <div class="divider"></div>
+        <div class="form-label">スマホ・iPadから開くURL（同じWi-Fi内）</div>
+        <div class="btn-row" style="margin-bottom: 8px;">
+          <div class="code-box" id="lan-url-box" style="flex:1;">-</div>
+          <button class="btn-outline btn-sm" onclick="copyTextById('lan-url-box', 'スマホ用URLをコピーしました')">URLコピー</button>
+        </div>
+        <div class="btn-row" id="autostart-win-row" style="margin-bottom: 4px;">
+          <button class="btn-amber btn-sm" onclick="manageAutostart('register')">PC起動時に自動起動を登録（おすすめ）</button>
+          <button class="btn-danger-outline btn-sm" onclick="manageAutostart('unregister')">解除</button>
+        </div>
+        <div class="kpi-sub">※登録しておくと、次回PCを立ち上げた時から裏で自動起動し、スマホからすぐ開けます。</div>
+
         <details class="sub-details">
-          <summary>詳細設定・PC単体タスクスケジューラ / クラウド設定</summary>
+          <summary>上級者向け設定（詳細パラメータ / GitHub Actions クラウド設定）</summary>
           <div style="margin-top: 10px;">
             <div class="inline-fields" style="margin-bottom: 10px;">
               <label class="check-row" style="margin-right: 10px;">
@@ -715,11 +727,6 @@
             </div>
             <div id="scheduler-nonwin-box" style="display:none; margin-bottom: 10px;">
               <div class="code-box" id="cron-example">-</div>
-            </div>
-            <div class="form-label">スマホLAN接続URL</div>
-            <div class="btn-row" style="margin-bottom: 10px;">
-              <div class="code-box" id="lan-url-box" style="flex:1;">-</div>
-              <button class="btn-outline btn-sm" onclick="copyTextById('lan-url-box', 'LAN URLをコピーしました')">コピー</button>
             </div>
             <div class="form-label">GitHub Actions (Privateリポジトリ) 用 Secrets 生成</div>
             <div class="btn-row" style="margin-bottom: 6px;">
@@ -1335,6 +1342,13 @@
       try {
         renderJob((await apiFetch("/api/scheduler", { method: "POST", body: JSON.stringify({ action }) })).job);
         showToast(action === "unregister" ? "タスク解除中です" : "4時刻タスク登録中です");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function manageAutostart(action) {
+      try {
+        renderJob((await apiFetch("/api/autostart", { method: "POST", body: JSON.stringify({ action }) })).job);
+        showToast(action === "unregister" ? "自動起動を解除中です" : "PC起動時の自動起動を登録中です");
       } catch (e) { showToast(e.message); }
     }
 

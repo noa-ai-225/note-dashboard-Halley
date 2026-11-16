@@ -983,6 +983,25 @@ class BackupUIHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.ACCEPTED, {"status": "started", "job": JOB_MANAGER.snapshot()})
             return
 
+        if path == "/api/autostart":
+            if sys.platform != "win32":
+                self._send_json(HTTPStatus.BAD_REQUEST, {"error": "Windows自動起動登録は Windows 環境専用です。"})
+                return
+            action = str(body.get("action", "register"))
+            ps_file = SCRIPTS_DIR / "register_ui_autostart_windows.ps1"
+            if action == "unregister":
+                cmd = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(ps_file), "-Unregister"]
+                job_label = "PC起動時の自動起動を解除"
+            else:
+                cmd = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(ps_file)]
+                job_label = "PC起動時のスマホ用自動起動を登録"
+            started = JOB_MANAGER.start_subprocess(job_label, cmd)
+            if not started:
+                self._send_json(HTTPStatus.CONFLICT, {"error": "別のジョブが実行中です。"})
+                return
+            self._send_json(HTTPStatus.ACCEPTED, {"status": "started", "job": JOB_MANAGER.snapshot()})
+            return
+
         if path in ("/api/settings", "/api/schedule"):
             try:
                 saved = save_local_settings(body)
