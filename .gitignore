@@ -1,0 +1,33 @@
+# 認証情報・セッション情報（絶対にGitにコミットしない）
+data/auth/*
+!data/auth/.gitkeep
+
+# 取得した生データ・エクスポートCSV・ログ
+data/raw/*
+!data/raw/.gitkeep
+data/exports/*
+!data/exports/.gitkeep
+data/logs/*
+!data/logs/.gitkeep
+
+# SQLiteデータベース
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.sqlite3
+
+# ローカル設定上書き
+config/settings.local.json
+
+# Python / 仮想環境
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

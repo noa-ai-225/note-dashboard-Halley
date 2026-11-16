@@ -1,0 +1,102 @@
+name: Harry note Lab Hourly Backup
+
+on:
+  schedule:
+    # 毎日 JST 09:00, 14:00, 20:00, 23:00 (UTC 00:00, 05:00, 11:00, 14:00)
+    - cron: "0 0,5,11,14 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "安全弁（最低2時間ルール）を無視して強制実行"
+        required: false
+        default: false
+        type: boolean
+      slot:
+        description: "時間帯スロット明示指定 (例: 09:00 / 14:00 / 20:00 / 23:00)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check repository visibility (Private repo guard)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          is_private=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${{ github.repository }}" | python3 -c "import sys, json; print(json.load(sys.stdin).get('private', False))")
+          if [ "$is_private" != "True" ]; then
+            echo "::error::セキュリティ保護のため Public リポジトリではクラウド自動観測を実行できません。Private リポジトリに変更してください。"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies and Playwright Chromium
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Restore session_state.json from Secrets
+        env:
+          NOTE_SESSION_STATE_B64: ${{ secrets.NOTE_SESSION_STATE_B64 }}
+        run: |
+          if [ -z "$NOTE_SESSION_STATE_B64" ]; then
+            echo "::error::Secrets に NOTE_SESSION_STATE_B64 が未設定です。"
+            exit 1
+          fi
+          mkdir -p data/auth
+          printf '%s' "$NOTE_SESSION_STATE_B64" | tr -d '\r\n' | base64 --decode > data/auth/session_state.json
+          chmod 600 data/auth/session_state.json
+
+      - name: Run hourly observation backup (JST)
+        env:
+          TZ: Asia/Tokyo
+        run: |
+          mkdir -p data/logs
+          FORCE_FLAG=""
+          SLOT_FLAG=""
+          if [ "${{ inputs.force }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          if [ -n "${{ inputs.slot }}" ]; then
+            SLOT_FLAG="--slot ${{ inputs.slot }}"
+          fi
+          python src/main.py --type scheduled $FORCE_FLAG $SLOT_FLAG 2>&1 | tee -a data/logs/scheduled_backup.log
+
+      - name: Commit updated DB and CSVs to Private repository
+        env:
+          TZ: Asia/Tokyo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/note_stats.db data/exports/*.csv
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "lab: update note hourly stats ($(date +'%Y-%m-%d %H:%M JST'))"
+            git push
+          fi
+
+      - name: Upload CSV and logs artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harry-note-lab-exports
+          path: |
+            data/exports/
+            data/logs/
+          retention-days: 30

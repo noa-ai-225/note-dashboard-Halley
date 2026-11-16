@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ハリーnote実験記録" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>ハリーのnote実験記録 | 時間別観測＆バックアップラボ</title>
+  <style>
+    :root {
+      --bg: #fdf8ec;
+      --grid-line: rgba(196, 173, 138, 0.22);
+      --card: #ffffff;
+      --card-warm: #fffdf7;
+      --border: #e7d8c0;
+      --ink: #4a3525;
+      --muted: #7c6756;
+      --teal: #2a9d8f;
+      --teal-dark: #218074;
+      --teal-bg: #e6f6f3;
+      --amber: #e68a19;
+      --amber-bg: #fef3c7;
+      --sky: #0284c7;
+      --sky-bg: #e0f2fe;
+      --coral: #e05a47;
+      --coral-bg: #fee2e2;
+      --leaf: #4d9e56;
+      --leaf-bg: #ecfdf5;
+      --radius: 16px;
+      --shadow: 0 3px 10px rgba(74, 53, 37, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--ink);
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 24px 24px;
+      line-height: 1.55;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 16px 52px;
+    }
+
+    /* Harry Lab Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, #e0f4ff 0%, #f4fce8 55%, #fff7db 100%);
+      border: 2px solid #d5c5ab;
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .hero-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .mascot-badge {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: #fffdf7;
+      border: 2px solid #d5c5ab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(74, 53, 37, 0.08);
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: 1.32rem;
+      font-weight: 900;
+      color: var(--ink);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-sub {
+      margin: 4px 0 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .sticky-note {
+      background: #fef3c7;
+      border: 1.5px solid #f5d076;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #784b14;
+      transform: rotate(-1deg);
+      box-shadow: 0 2px 4px rgba(120, 75, 20, 0.08);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+    .badge-ok { background: var(--leaf-bg); color: #1f7a38; border: 1px solid #bbf7d0; }
+    .badge-teal { background: var(--teal-bg); color: var(--teal-dark); border: 1px solid #99e2d8; }
+    .badge-warn { background: var(--amber-bg); color: #9a5808; border: 1px solid #fde68a; }
+    .badge-danger { background: var(--coral-bg); color: #b83222; border: 1px solid #fecaca; }
+    .badge-info { background: var(--sky-bg); color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-muted { background: #efe7da; color: var(--muted); }
+
+    /* 5-Metric KPI Grid */
+    .kpi5-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 980px) {
+      .kpi5-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .kpi5-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-card {
+      background: var(--card-warm);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 14px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--accent, var(--teal));
+    }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .kpi-value {
+      font-size: 1.38rem;
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .kpi-delta {
+      margin-top: 5px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .delta-pos { color: #1f7a38; }
+    .delta-neg { color: var(--coral); }
+    .delta-zero { color: var(--muted); }
+
+    /* 4 Time-Slot Cards (09:00, 14:00, 20:00, 23:00) */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 900px) {
+      .slots-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      .slots-grid { grid-template-columns: 1fr; }
+    }
+
+    .slot-card {
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      padding: 13px;
+      background: #fffdf8;
+    }
+    .slot-card.filled {
+      border-color: #9ad8cf;
+      background: linear-gradient(180deg, #f2fbf9 0%, #ffffff 35%);
+    }
+    .slot-card.empty {
+      border-style: dashed;
+      background: #faf5ea;
+      opacity: 0.85;
+    }
+    .slot-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 900;
+      font-size: 0.95rem;
+    }
+    .slot-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.82rem;
+    }
+    .slot-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px dashed #efe5d5;
+      padding-bottom: 3px;
+    }
+    .slot-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 860px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .card-title {
+      margin: 0 0 12px;
+      font-size: 1.04rem;
+      font-weight: 900;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .section-desc {
+      margin: 0 0 12px;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 8px 11px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      color: var(--teal-dark);
+      border-bottom-color: var(--teal);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    button, .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 15px;
+      border-radius: 10px;
+      border: 1.5px solid transparent;
+      font-size: 0.86rem;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.08s, background 0.15s, opacity 0.15s;
+    }
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary { background: var(--teal); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--teal-dark); }
+    .btn-amber { background: var(--amber); color: #fff; }
+    .btn-amber:hover:not(:disabled) { background: #cc7711; }
+    .btn-dark { background: var(--ink); color: #fff; }
+    .btn-dark:hover:not(:disabled) { background: #36261a; }
+    .btn-outline { background: #fff; color: var(--ink); border-color: var(--border); }
+    .btn-outline:hover:not(:disabled) { background: #faf4e8; }
+    .btn-danger-outline { background: #fff; color: var(--coral); border-color: #fecaca; }
+    .btn-danger-outline:hover:not(:disabled) { background: var(--coral-bg); }
+    .btn-sm { padding: 6px 11px; font-size: 0.79rem; }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    textarea, input[type="text"], input[type="password"], input[type="number"], input[type="time"], select {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1.5px solid #d9c8ae;
+      border-radius: 10px;
+      font-size: 0.87rem;
+      font-family: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+      font-family: Consolas, monospace;
+      font-size: 0.81rem;
+    }
+
+    label.check-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .form-group { margin-bottom: 12px; }
+    .form-label {
+      display: block;
+      font-size: 0.79rem;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .inline-fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .steps-list {
+      margin: 0 0 12px;
+      padding-left: 18px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .console-box {
+      background: #2b2119;
+      color: #f7efe2;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.79rem;
+      line-height: 1.5;
+      height: 195px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      max-height: 380px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f0e6d6;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: #faf3e4;
+      position: sticky;
+      top: 0;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    td.title-cell {
+      white-space: normal;
+      min-width: 220px;
+      max-width: 360px;
+    }
+    td.title-cell a {
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    td.title-cell a:hover { text-decoration: underline; color: var(--teal-dark); }
+    td.num, th.num { text-align: right; }
+
+    .chart-box {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: #fffdf7;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .chart-svg {
+      width: 100%;
+      height: 170px;
+      display: block;
+    }
+
+    .mobile-cards { display: none; }
+    .m-card {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fffdf8;
+    }
+    .m-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      font-size: 0.8rem;
+      margin-top: 6px;
+    }
+
+    .archive-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .archive-item {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #faf5ea;
+      font-size: 0.83rem;
+    }
+
+    details.sub-details {
+      margin-top: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      background: #faf5ea;
+    }
+    details.sub-details summary {
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .code-box {
+      background: #faf5ea;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-family: Consolas, monospace;
+      font-size: 0.78rem;
+      word-break: break-all;
+    }
+    .divider { border-top: 1.5px solid var(--border); margin: 14px 0; }
+    .kpi-sub { font-size: 0.77rem; color: var(--muted); }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(74, 53, 37, 0.25);
+      display: none;
+      z-index: 60;
+    }
+
+    @media (max-width: 680px) {
+      .desktop-table { display: none; }
+      .mobile-cards { display: block; }
+      button, .btn { min-height: 42px; }
+      .hero-title { font-size: 1.12rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Harry's Lab Hero Header -->
+    <header class="hero-banner">
+      <div class="hero-left">
+        <div class="mascot-badge" aria-hidden="true">
+          <!-- White-coat Hedgehog Researcher SVG -->
+          <svg width="54" height="54" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Spikes -->
+            <path d="M14 34L8 26L17 24L14 15L23 18L26 9L32 16L39 9L41 18L50 15L47 24L56 26L50 34Z" fill="#7D5333" stroke="#4A3525" stroke-width="2" stroke-linejoin="round"/>
+            <!-- Face -->
+            <ellipse cx="32" cy="34" rx="16" ry="13" fill="#FBE5C8" stroke="#4A3525" stroke-width="2"/>
+            <!-- Ears -->
+            <circle cx="20" cy="24" r="3.5" fill="#FBE5C8" stroke="#4A3525" stroke-width="1.8"/>
+            <circle cx="44" cy="24" r="3.5" fill="#FBE5C8" stroke="#4A3525" stroke-width="1.8"/>
+            <!-- Eyes & Blush -->
+            <circle cx="26" cy="33" r="2.3" fill="#2B1D14"/>
+            <circle cx="38" cy="33" r="2.3" fill="#2B1D14"/>
+            <ellipse cx="22" cy="36.5" rx="2.5" ry="1.5" fill="#F7A79B"/>
+            <ellipse cx="42" cy="36.5" rx="2.5" ry="1.5" fill="#F7A79B"/>
+            <!-- Nose & Smile -->
+            <ellipse cx="32" cy="36" rx="2.2" ry="1.7" fill="#2B1D14"/>
+            <path d="M29.5 39.5C30.8 41 33.2 41 34.5 39.5" stroke="#4A3525" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- Lab Coat -->
+            <path d="M17 45C17 42 23 41 32 41C41 41 47 42 47 45L49 56H15L17 45Z" fill="#FFFFFF" stroke="#4A3525" stroke-width="2"/>
+            <path d="M32 41V56" stroke="#CBD5E1" stroke-width="1.6"/>
+            <!-- Blue Experiment Flask -->
+            <path d="M47 41H53L56 52C56.4 53.5 55.3 55 53.8 55H46.2C44.7 55 43.6 53.5 44 52L47 41Z" fill="#E0F2FE" stroke="#4A3525" stroke-width="1.8"/>
+            <path d="M45 50H55L55.5 52.3C55.7 53.4 54.9 54.4 53.8 54.4H46.2C45.1 54.4 44.3 53.4 44.5 52.3L45 50Z" fill="#38BDF8"/>
+            <!-- Sprout -->
+            <path d="M13 48V42M13 44C10 43 9 40 12 39C14 39 14 42 13 44ZM13 44C16 43 17 40 14 39C12 39 12 42 13 44Z" stroke="#3CA374" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="hero-title">
+            <span>ハリーのnote実験記録</span>
+            <span class="badge badge-teal">定時観測ラボ</span>
+          </h1>
+          <p class="hero-sub">一緒に試して、noteを育てよう — 09:00 / 14:00 / 20:00 / 23:00 の変化を自動記録</p>
+        </div>
+      </div>
+      <div class="btn-row">
+        <div class="sticky-note" id="hero-sticky">今日もやってみる！</div>
+        <button class="btn-outline btn-sm" onclick="refreshStatus(true)">最新表示に更新</button>
+      </div>
+    </header>
+
+    <!-- 5-Metric KPI Cards (Imp / PV / Likes / Comments / Followers) -->
+    <section class="kpi5-grid">
+      <div class="kpi-card" style="--accent: #0284c7;">
+        <div class="kpi-label">インプレッション</div>
+        <div class="kpi-value" id="kpi-imp">-</div>
+        <div class="kpi-delta" id="kpi-imp-diff">前回比: -</div>
+      </div>
+      <div class="kpi-card" style="--accent: #e05a47;">
+        <div class="kpi-label">ページビュー (PV)</div>
+        <div class="kpi-value" id="kpi-pv">-</div>
+        <div class="kpi-delta" id="kpi-pv-diff">前回比: -</div>
+      </div>
+      <div class="kpi-card" style="--accent: #e68a19;">
+        <div class="kpi-label">スキ数</div>
+        <div class="kpi-value" id="kpi-likes">-</div>
+        <div class="kpi-delta" id="kpi-likes-diff">前回比: -</div>
+      </div>
+      <div class="kpi-card" style="--accent: #2a9d8f;">
+        <div class="kpi-label">コメント数</div>
+        <div class="kpi-value" id="kpi-comm">-</div>
+        <div class="kpi-delta" id="kpi-comm-diff">前回比: -</div>
+      </div>
+      <div class="kpi-card" style="--accent: #4d9e56;">
+        <div class="kpi-label">フォロワー数</div>
+        <div class="kpi-value" id="kpi-fol">-</div>
+        <div class="kpi-delta" id="kpi-fol-diff">前回比: -</div>
+      </div>
+    </section>
+
+    <!-- Main Time-Slot Lab View -->
+    <section class="card" style="margin-bottom: 18px;">
+      <div class="card-title">
+        <span>時間ごとの観測記録 ＆ 増減（09:00 / 14:00 / 20:00 / 23:00）</span>
+        <div class="btn-row">
+          <div style="width: 155px;">
+            <select id="date-select" onchange="renderDaySlots()"></select>
+          </div>
+          <a class="btn btn-primary btn-sm" id="btn-hourly-dl" href="/api/export/hourly.csv" style="display:none;">時間別CSV保存</a>
+        </div>
+      </div>
+
+      <!-- 4 Time-Slot Cards for Selected Date -->
+      <div class="slots-grid" id="day-slots-grid"></div>
+
+      <!-- Pure SVG Trend Chart -->
+      <div class="chart-box" id="chart-box" style="display:none;">
+        <div class="card-title" style="margin-bottom: 8px; font-size: 0.92rem;">
+          <span>時間帯別の推移グラフ</span>
+          <div class="btn-row">
+            <button class="btn-outline btn-sm" onclick="setChartMetric('page_views', 'PV推移', '#e05a47')">PV</button>
+            <button class="btn-outline btn-sm" onclick="setChartMetric('impressions', 'インプ推移', '#0284c7')">インプ</button>
+            <button class="btn-outline btn-sm" onclick="setChartMetric('follower_count', 'フォロワー推移', '#4d9e56')">フォロワー</button>
+            <button class="btn-outline btn-sm" onclick="setChartMetric('likes', 'スキ推移', '#e68a19')">スキ</button>
+          </div>
+        </div>
+        <div class="kpi-sub" id="chart-caption" style="margin-bottom: 6px;">PV推移</div>
+        <svg class="chart-svg" id="trend-svg" viewBox="0 0 640 170" preserveAspectRatio="none"></svg>
+      </div>
+
+      <!-- All Hourly Records Table (PC) & Cards (Mobile) -->
+      <div id="timeline-empty" class="section-desc">まだ観測記録がありません。認証後に「今すぐ観測を実行」するか定時実行をお待ちください。</div>
+      <div id="timeline-wrap" style="display:none;">
+        <div class="table-wrap desktop-table">
+          <table>
+            <thead>
+              <tr>
+                <th>日時</th>
+                <th>時間帯</th>
+                <th class="num">インプ (増減)</th>
+                <th class="num">PV (増減)</th>
+                <th class="num">スキ (増減)</th>
+                <th class="num">コメント (増減)</th>
+                <th class="num">フォロワー (増減)</th>
+              </tr>
+            </thead>
+            <tbody id="timeline-tbody"></tbody>
+          </table>
+        </div>
+        <div class="mobile-cards" id="timeline-mobile-cards"></div>
+      </div>
+    </section>
+
+    <!-- Controls Grid: Schedule/Backup + Auth -->
+    <section class="main-grid">
+      <!-- Schedule & Backup Panel -->
+      <div class="card">
+        <div class="card-title">
+          <span>定時観測スケジュール ＆ 手動実行</span>
+          <span class="badge badge-muted" id="job-header-badge">待機中</span>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 8px;">
+          <button class="btn-primary" id="btn-backup" onclick="runBackup(false)">今すぐ観測を実行</button>
+          <button class="btn-outline btn-sm" id="btn-parse-only" onclick="runBackup(true)">最新rawから再生成</button>
+        </div>
+        <div class="form-group">
+          <label class="check-row">
+            <input type="checkbox" id="force-backup" />
+            安全弁（最低2時間ルール）を無視して強制取得（<code>--force</code>）
+          </label>
+          <div class="kpi-sub" id="cooldown-desc" style="margin-top: 3px;">-</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-label">定時観測（スマホ／iPadからON/OFF・時刻変更可能）</div>
+        <div class="form-group">
+          <label class="check-row">
+            <input type="checkbox" id="builtin-enabled" checked />
+            自動定時観測を有効にする
+          </label>
+        </div>
+        <div class="inline-fields" style="margin-bottom: 8px;">
+          <div style="flex: 1; min-width: 190px;">
+            <label class="form-label" for="schedule-times-input">観測時刻（カンマ区切り）</label>
+            <input type="text" id="schedule-times-input" value="09:00, 14:00, 20:00, 23:00" />
+          </div>
+          <button class="btn-dark btn-sm" onclick="saveSchedule()">時刻設定を保存</button>
+        </div>
+        <div class="kpi-sub" id="builtin-next-run">次回観測予定: -</div>
+
+        <details class="sub-details">
+          <summary>詳細設定・PC単体タスクスケジューラ / クラウド設定</summary>
+          <div style="margin-top: 10px;">
+            <div class="inline-fields" style="margin-bottom: 10px;">
+              <label class="check-row" style="margin-right: 10px;">
+                <input type="checkbox" id="set-headless" checked />
+                ヘッドレス収集
+              </label>
+              <div style="width: 110px;">
+                <label class="form-label" for="set-clicks">もっとみる上限</label>
+                <input type="number" id="set-clicks" min="1" max="200" value="50" />
+              </div>
+              <button class="btn-outline btn-sm" onclick="saveSettings()">詳細保存</button>
+            </div>
+            <div id="scheduler-win-box" style="display:none; margin-bottom: 10px;">
+              <div class="btn-row">
+                <button class="btn-outline btn-sm" id="btn-sched-reg" onclick="manageScheduler('register')">Windowsタスクに4時刻登録</button>
+                <button class="btn-danger-outline btn-sm" id="btn-sched-unreg" onclick="manageScheduler('unregister')">解除</button>
+              </div>
+            </div>
+            <div id="scheduler-nonwin-box" style="display:none; margin-bottom: 10px;">
+              <div class="code-box" id="cron-example">-</div>
+            </div>
+            <div class="form-label">スマホLAN接続URL</div>
+            <div class="btn-row" style="margin-bottom: 10px;">
+              <div class="code-box" id="lan-url-box" style="flex:1;">-</div>
+              <button class="btn-outline btn-sm" onclick="copyTextById('lan-url-box', 'LAN URLをコピーしました')">コピー</button>
+            </div>
+            <div class="form-label">GitHub Actions (Privateリポジトリ) 用 Secrets 生成</div>
+            <div class="btn-row" style="margin-bottom: 6px;">
+              <button class="btn-outline btn-sm" onclick="generateGithubSecret()">NOTE_SESSION_STATE_B64 を生成</button>
+              <button class="btn-outline btn-sm" id="btn-copy-secret" onclick="copyTextById('secret-b64-box', 'Secrets文字列をコピーしました')" style="display:none;">コピー</button>
+            </div>
+            <div class="code-box" id="secret-b64-box" style="display:none; max-height:74px; overflow:auto;"></div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Auth Panel -->
+      <div class="card">
+        <div class="card-title">
+          <span>初回ログイン認証（PCで1回のみ）</span>
+          <span class="badge badge-muted" id="auth-badge">-</span>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('auth', 'browser', this)">方法1: PCブラウザ</button>
+          <button class="tab-btn" onclick="switchTab('auth', 'cookie', this)">方法2: Cookie貼り付け</button>
+          <button class="tab-btn" onclick="switchTab('auth', 'creds', this)">方法3: ID・パス入力</button>
+        </div>
+
+        <div id="auth-tab-browser" class="tab-panel active">
+          <p class="section-desc">
+            <strong>Google・X・Apple連携／2段階認証の方はこちら（PC操作時用）</strong><br />
+            PC画面にChromeが開きます。noteへログインすると自動でセッションを保存します。
+          </p>
+          <button class="btn-primary" id="btn-login" onclick="startBrowserLogin()">PC画面にブラウザを開く</button>
+        </div>
+
+        <div id="auth-tab-cookie" class="tab-panel">
+          <ol class="steps-list">
+            <li>PCの普段のブラウザでログイン済みの <code>note.com</code> を開き、<code>F12</code> を押します。</li>
+            <li><strong>Application</strong> → <strong>Cookies</strong> → <code>https://note.com</code></li>
+            <li><code>_note_session_v5</code>（または <code>_note_session</code>）の Value を貼り付けます。</li>
+          </ol>
+          <div class="form-group">
+            <textarea id="cookie-input" placeholder="ここに _note_session_v5 の Value を貼り付け..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="check-row">
+              <input type="checkbox" id="cookie-skip-verify" />
+              保存時のダッシュボード疎通テストをスキップする
+            </label>
+          </div>
+          <button class="btn-primary" id="btn-cookie" onclick="importCookie()">取り込んで接続確認</button>
+        </div>
+
+        <div id="auth-tab-creds" class="tab-panel">
+          <p class="section-desc">
+            メールアドレス／note ID＋パスワードを設定済みの方専用（Google連携のみの方は方法1または2を使用）。
+          </p>
+          <div class="form-group">
+            <label class="form-label" for="auth-identifier">メールアドレス または note ID</label>
+            <input type="text" id="auth-identifier" autocomplete="username" placeholder="example@mail.com または note_id" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="auth-password">パスワード</label>
+            <input type="password" id="auth-password" autocomplete="current-password" placeholder="パスワード" />
+          </div>
+          <button class="btn-primary" id="btn-creds" onclick="startCredentialsLogin()">ログインしてセッション保存</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="btn-row" style="justify-content: space-between;">
+          <span class="kpi-sub" id="auth-sub">-</span>
+          <button class="btn-danger-outline btn-sm" id="btn-logout" onclick="clearAuthSession()">セッション削除</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Console -->
+    <section class="card" style="margin-bottom: 18px;">
+      <div class="card-title">
+        <span>実験コンソール（リアルタイムログ）</span>
+        <div class="btn-row">
+          <button class="btn-danger-outline btn-sm" id="btn-cancel-job" onclick="cancelCurrentJob()" style="display:none;">処理中断</button>
+          <span class="badge badge-muted" id="console-status">待機中</span>
+        </div>
+      </div>
+      <div class="console-box" id="console-box">操作を実行すると、ここにリアルタイムでログが表示されます。</div>
+    </section>
+
+    <!-- Articles, Archives & Logs -->
+    <section class="card">
+      <div class="card-title">
+        <span>記事別データ・アーカイブ・実行ログ</span>
+        <div class="btn-row">
+          <a class="btn btn-primary btn-sm" id="btn-csv-dl" href="/api/export/latest.csv" style="display:none;">記事CSV保存</a>
+          <a class="btn btn-outline btn-sm" id="btn-db-dl" href="/api/export/db" style="display:none;">SQLite DB保存</a>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('data', 'csv', this)">記事別データ</button>
+        <button class="tab-btn" onclick="switchTab('data', 'archives', this)">過去CSVアーカイブ</button>
+        <button class="tab-btn" onclick="switchTab('data', 'schedlog', this)">定時実行ログ</button>
+      </div>
+
+      <div id="data-tab-csv" class="tab-panel active">
+        <div id="csv-empty" class="section-desc">まだ記事データがありません。</div>
+        <div id="csv-wrap" style="display:none;">
+          <div class="form-group" style="max-width: 320px;">
+            <input type="text" id="csv-filter" placeholder="記事タイトルで絞り込み..." oninput="renderCsvTable()" />
+          </div>
+          <div class="table-wrap desktop-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>状態</th>
+                  <th>記事タイトル</th>
+                  <th>公開日</th>
+                  <th class="num">インプ (差分)</th>
+                  <th class="num">PV (差分)</th>
+                  <th class="num">スキ (差分)</th>
+                  <th class="num">コメント (差分)</th>
+                </tr>
+              </thead>
+              <tbody id="csv-tbody"></tbody>
+            </table>
+          </div>
+          <div class="mobile-cards" id="csv-mobile-cards"></div>
+          <div class="kpi-sub" id="csv-note" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <div id="data-tab-archives" class="tab-panel">
+        <div class="archive-list" id="archive-list"></div>
+      </div>
+
+      <div id="data-tab-schedlog" class="tab-panel">
+        <div class="btn-row" style="margin-bottom: 10px;">
+          <button class="btn-outline btn-sm" onclick="refreshStatus(true)">ログ再読込</button>
+          <button class="btn-outline btn-sm" onclick="openFolder('exports')">PC側CSVフォルダ</button>
+          <button class="btn-outline btn-sm" onclick="openFolder('logs')">PC側ログフォルダ</button>
+        </div>
+        <div class="console-box" id="sched-log-box">定時実行ログはまだありません。</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentState = null;
+    let pollTimer = null;
+    let chartMetric = "page_views";
+    let chartLabel = "PV推移";
+    let chartColor = "#e05a47";
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => { el.style.display = "none"; }, 3200);
+    }
+
+    function switchTab(group, name, btn) {
+      const card = btn.closest(".card");
+      card.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      card.querySelectorAll(`[id^="${group}-tab-"]`).forEach(p => p.classList.remove("active"));
+      document.getElementById(`${group}-tab-${name}`).classList.add("active");
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function diffBadgeHtml(diffStr) {
+      const s = String(diffStr || "-");
+      if (s === "-" || s === "") return `<span class="delta-zero">(初回)</span>`;
+      if (s.startsWith("+")) return `<span class="delta-pos">(${escapeHtml(s)})</span>`;
+      if (s.startsWith("-")) return `<span class="delta-neg">(${escapeHtml(s)})</span>`;
+      return `<span class="delta-zero">(±0)</span>`;
+    }
+
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function setJobButtonsDisabled(disabled) {
+      ["btn-creds", "btn-login", "btn-cookie", "btn-backup", "btn-parse-only", "btn-sched-reg", "btn-sched-unreg", "btn-logout"]
+        .forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = disabled;
+        });
+      document.getElementById("btn-cancel-job").style.display = disabled ? "inline-flex" : "none";
+    }
+
+    function renderJob(job) {
+      const badge = document.getElementById("console-status");
+      const headerBadge = document.getElementById("job-header-badge");
+      const box = document.getElementById("console-box");
+      const labels = {
+        idle: ["待機中", "badge-muted"],
+        running: [`実行中: ${job.job_name}`, "badge-info"],
+        success: [`完了: ${job.job_name}`, "badge-ok"],
+        error: [`エラー終了: ${job.job_name}`, "badge-danger"],
+      };
+      const [text, cls] = labels[job.status] || labels.idle;
+      badge.textContent = text;
+      badge.className = `badge ${cls}`;
+      headerBadge.textContent = text;
+      headerBadge.className = `badge ${cls}`;
+
+      if (job.logs && job.logs.length > 0) {
+        box.textContent = job.logs.join("\n");
+        box.scrollTop = box.scrollHeight;
+      }
+      setJobButtonsDisabled(Boolean(job.running));
+
+      if (job.running && !pollTimer) {
+        pollTimer = setInterval(pollJob, 1000);
+      } else if (!job.running && pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        refreshStatus(false);
+      }
+    }
+
+    async function pollJob() {
+      try {
+        renderJob(await apiFetch("/api/job"));
+      } catch (e) { console.error(e); }
+    }
+
+    function renderDaySlots() {
+      if (!currentState) return;
+      const grid = document.getElementById("day-slots-grid");
+      const times = (currentState.settings.schedule_times || ["09:00", "14:00", "20:00", "23:00"]);
+      const selDate = document.getElementById("date-select").value;
+      const records = (currentState.timeline && currentState.timeline.records) || [];
+      const dayRecords = records.filter(r => r.snapshot_date === selDate);
+
+      const bySlot = {};
+      dayRecords.forEach(r => {
+        if (!bySlot[r.time_slot]) bySlot[r.time_slot] = r;
+      });
+
+      const slotIcons = { "09:00": "🌅", "14:00": "☀️", "20:00": "🌆", "23:00": "🌙" };
+
+      grid.innerHTML = times.map(slot => {
+        const rec = bySlot[slot];
+        const icon = slotIcons[slot] || "🧪";
+        if (!rec) {
+          return `
+            <div class="slot-card empty">
+              <div class="slot-head">
+                <span>${icon} ${escapeHtml(slot)}</span>
+                <span class="badge badge-muted">未取得</span>
+              </div>
+              <div class="kpi-sub">この時間帯の記録はまだありません</div>
+            </div>
+          `;
+        }
+        return `
+          <div class="slot-card filled">
+            <div class="slot-head">
+              <span>${icon} ${escapeHtml(slot)}</span>
+              <span class="badge badge-teal">記録済み</span>
+            </div>
+            <div class="slot-metrics">
+              <div class="slot-row"><span>インプ</span><span><strong>${rec.impressions.toLocaleString()}</strong> ${diffBadgeHtml(rec.diff_impressions_str)}</span></div>
+              <div class="slot-row"><span>PV</span><span><strong>${rec.page_views.toLocaleString()}</strong> ${diffBadgeHtml(rec.diff_page_views_str)}</span></div>
+              <div class="slot-row"><span>スキ</span><span><strong>${rec.likes.toLocaleString()}</strong> ${diffBadgeHtml(rec.diff_likes_str)}</span></div>
+              <div class="slot-row"><span>コメント</span><span><strong>${rec.comments.toLocaleString()}</strong> ${diffBadgeHtml(rec.diff_comments_str)}</span></div>
+              <div class="slot-row"><span>フォロワー</span><span><strong>${rec.follower_count.toLocaleString()}</strong> ${diffBadgeHtml(rec.diff_follower_count_str)}</span></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function setChartMetric(metric, label, color) {
+      chartMetric = metric;
+      chartLabel = label;
+      chartColor = color;
+      renderTrendChart();
+    }
+
+    function renderTrendChart() {
+      if (!currentState) return;
+      const box = document.getElementById("chart-box");
+      const svg = document.getElementById("trend-svg");
+      const records = ((currentState.timeline && currentState.timeline.records) || []).slice(0, 24).reverse();
+
+      if (records.length < 2) {
+        box.style.display = "none";
+        return;
+      }
+      box.style.display = "block";
+      document.getElementById("chart-caption").textContent = `${chartLabel}（直近 ${records.length} 観測）`;
+
+      const vals = records.map(r => Number(r[chartMetric] || 0));
+      const minV = Math.min(...vals);
+      const maxV = Math.max(...vals);
+      const span = maxV - minV || 1;
+      const padX = 28, padY = 22, w = 640 - padX * 2, h = 170 - padY * 2;
+
+      const pts = vals.map((v, i) => {
+        const x = padX + (i / (vals.length - 1)) * w;
+        const y = padY + h - ((v - minV) / span) * h;
+        return { x, y, v, label: `${r_date(records[i])}` };
+      });
+      function r_date(r) { return `${r.snapshot_date.slice(5)} ${r.time_slot}`; }
+
+      const poly = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+      const dots = pts.map((p, idx) => `
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${chartColor}" stroke="#fff" stroke-width="1.5"></circle>
+        ${(idx === 0 || idx === pts.length - 1 || idx % Math.ceil(pts.length / 5) === 0)
+          ? `<text x="${p.x.toFixed(1)}" y="162" text-anchor="middle" font-size="10" fill="#7c6756">${escapeHtml(p.label)}</text>`
+          : ""}
+      `).join("");
+
+      svg.innerHTML = `
+        <line x1="${padX}" y1="${padY}" x2="${640 - padX}" y2="${padY}" stroke="#efe5d5" stroke-dasharray="3,3" />
+        <line x1="${padX}" y1="${padY + h}" x2="${640 - padX}" y2="${padY + h}" stroke="#efe5d5" />
+        <text x="${padX}" y="14" font-size="10.5" font-weight="700" fill="#7c6756">最大: ${maxV.toLocaleString()}</text>
+        <text x="${640 - padX}" y="14" text-anchor="end" font-size="10.5" font-weight="700" fill="#7c6756">最小: ${minV.toLocaleString()}</text>
+        <polyline fill="none" stroke="${chartColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${poly}" />
+        ${dots}
+      `;
+    }
+
+    function renderTimelineTable() {
+      if (!currentState) return;
+      const records = (currentState.timeline && currentState.timeline.records) || [];
+      const emptyEl = document.getElementById("timeline-empty");
+      const wrapEl = document.getElementById("timeline-wrap");
+      const dlBtn = document.getElementById("btn-hourly-dl");
+
+      if (records.length === 0) {
+        emptyEl.style.display = "block";
+        wrapEl.style.display = "none";
+        dlBtn.style.display = "none";
+        return;
+      }
+      emptyEl.style.display = "none";
+      wrapEl.style.display = "block";
+      dlBtn.style.display = currentState.exports.hourly_csv_exists ? "inline-flex" : "none";
+
+      document.getElementById("timeline-tbody").innerHTML = records.map(r => `
+        <tr>
+          <td>${escapeHtml(r.captured_at)}</td>
+          <td><span class="badge ${r.capture_type === 'scheduled' ? 'badge-teal' : 'badge-muted'}">${escapeHtml(r.time_slot)}</span></td>
+          <td class="num"><strong>${r.impressions.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_impressions_str)}</td>
+          <td class="num"><strong>${r.page_views.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_page_views_str)}</td>
+          <td class="num"><strong>${r.likes.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_likes_str)}</td>
+          <td class="num"><strong>${r.comments.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_comments_str)}</td>
+          <td class="num"><strong>${r.follower_count.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_follower_count_str)}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("timeline-mobile-cards").innerHTML = records.map(r => `
+        <div class="m-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${escapeHtml(r.snapshot_date)}</strong>
+            <span class="badge ${r.capture_type === 'scheduled' ? 'badge-teal' : 'badge-muted'}">${escapeHtml(r.time_slot)} (${escapeHtml(r.captured_at.slice(11, 16))})</span>
+          </div>
+          <div class="m-card-grid">
+            <div>インプ: <strong>${r.impressions.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_impressions_str)}</div>
+            <div>PV: <strong>${r.page_views.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_page_views_str)}</div>
+            <div>スキ: <strong>${r.likes.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_likes_str)}</div>
+            <div>コメント: <strong>${r.comments.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_comments_str)}</div>
+            <div>フォロワー: <strong>${r.follower_count.toLocaleString()}</strong> ${diffBadgeHtml(r.diff_follower_count_str)}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderCsvTable() {
+      if (!currentState) return;
+      const rows = currentState.exports.preview_rows || [];
+      const q = (document.getElementById("csv-filter").value || "").trim().toLowerCase();
+      const filtered = q ? rows.filter(r => (r.title || "").toLowerCase().includes(q)) : rows;
+
+      document.getElementById("csv-tbody").innerHTML = filtered.map(r => `
+        <tr>
+          <td><span class="badge badge-muted">${escapeHtml(r.status || "-")}</span></td>
+          <td class="title-cell"><a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.title)}</a></td>
+          <td>${escapeHtml(r.published_at || "-")}</td>
+          <td class="num"><strong>${Number(r.impressions || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_impressions)}</td>
+          <td class="num"><strong>${Number(r.page_views || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_pv)}</td>
+          <td class="num"><strong>${Number(r.likes || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_likes)}</td>
+          <td class="num"><strong>${Number(r.comments || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_comments)}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("csv-mobile-cards").innerHTML = filtered.map(r => `
+        <div class="m-card">
+          <span class="badge badge-muted">${escapeHtml(r.status || "-")}</span>
+          <span class="kpi-sub" style="margin-left:6px;">${escapeHtml(r.published_at || "-")}</span>
+          <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener" style="display:block; font-weight:800; color:var(--ink); text-decoration:none; margin:4px 0;">${escapeHtml(r.title)}</a>
+          <div class="m-card-grid">
+            <div>PV: <strong>${Number(r.page_views || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_pv)}</div>
+            <div>インプ: <strong>${Number(r.impressions || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_impressions)}</div>
+            <div>スキ: <strong>${Number(r.likes || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_likes)}</div>
+            <div>コメント: <strong>${Number(r.comments || 0).toLocaleString()}</strong> ${diffBadgeHtml(r.diff_comments)}</div>
+          </div>
+        </div>
+      `).join("");
+
+      document.getElementById("csv-note").textContent =
+        `最新CSV ${rows.length} 件を表示中（アーカイブCSV: ${currentState.exports.archive_count} 件 / 生JSON: ${currentState.raw_count} 件）`;
+    }
+
+    function renderStatus(data) {
+      currentState = data;
+
+      // 5 Metrics KPI
+      const latest = data.timeline && data.timeline.latest;
+      if (latest) {
+        document.getElementById("kpi-imp").textContent = latest.impressions.toLocaleString();
+        document.getElementById("kpi-imp-diff").innerHTML = `前回比: ${diffBadgeHtml(latest.diff_impressions_str)}`;
+        document.getElementById("kpi-pv").textContent = latest.page_views.toLocaleString();
+        document.getElementById("kpi-pv-diff").innerHTML = `前回比: ${diffBadgeHtml(latest.diff_page_views_str)}`;
+        document.getElementById("kpi-likes").textContent = latest.likes.toLocaleString();
+        document.getElementById("kpi-likes-diff").innerHTML = `前回比: ${diffBadgeHtml(latest.diff_likes_str)}`;
+        document.getElementById("kpi-comm").textContent = latest.comments.toLocaleString();
+        document.getElementById("kpi-comm-diff").innerHTML = `前回比: ${diffBadgeHtml(latest.diff_comments_str)}`;
+        document.getElementById("kpi-fol").textContent = `${latest.follower_count.toLocaleString()} 人`;
+        document.getElementById("kpi-fol-diff").innerHTML = `前回比: ${diffBadgeHtml(latest.diff_follower_count_str)}`;
+        document.getElementById("hero-sticky").textContent = `最終観測 ${latest.time_slot} (${latest.snapshot_date})`;
+      }
+
+      // Date Selector
+      const dateSel = document.getElementById("date-select");
+      const prevDate = dateSel.value;
+      const dates = (data.timeline && data.timeline.available_dates) || [];
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const listDates = dates.length > 0 ? dates : [todayIso];
+      dateSel.innerHTML = listDates.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join("");
+      if (prevDate && listDates.includes(prevDate)) dateSel.value = prevDate;
+
+      renderDaySlots();
+      renderTrendChart();
+      renderTimelineTable();
+
+      // Auth
+      const authBadge = document.getElementById("auth-badge");
+      const authSub = document.getElementById("auth-sub");
+      if (data.auth.configured) {
+        authBadge.textContent = "認証済み";
+        authBadge.className = "badge badge-ok";
+        authSub.textContent = `セッション更新: ${data.auth.updated_at}`;
+      } else {
+        authBadge.textContent = "未認証";
+        authBadge.className = "badge badge-warn";
+        authSub.textContent = "PCで初回ログインしてください";
+      }
+
+      // Cooldown
+      document.getElementById("cooldown-desc").textContent = data.cooldown.can_sync
+        ? (data.cooldown.elapsed_hours !== null ? `前回観測から ${data.cooldown.elapsed_hours} 時間経過（取得可能）` : "初回観測待機中")
+        : `安全弁作動中（あと約 ${data.cooldown.remaining_minutes} 分 / 最低 ${data.cooldown.min_safe_hours} 時間）`;
+
+      // Schedule
+      const bs = data.builtin_scheduler || {};
+      document.getElementById("builtin-enabled").checked = Boolean(bs.enabled);
+      document.getElementById("schedule-times-input").value = (bs.schedule_times || ["09:00", "14:00", "20:00", "23:00"]).join(", ");
+      document.getElementById("builtin-next-run").textContent = bs.enabled
+        ? `次回定時観測予定: ${bs.next_run_at || "-"}`
+        : "自動定時観測は現在 OFF です。";
+
+      if (data.scheduler.supported) {
+        document.getElementById("scheduler-win-box").style.display = "block";
+        document.getElementById("scheduler-nonwin-box").style.display = "none";
+      } else {
+        document.getElementById("scheduler-win-box").style.display = "none";
+        document.getElementById("scheduler-nonwin-box").style.display = "block";
+        document.getElementById("cron-example").textContent = data.scheduler.cron_example || "";
+      }
+
+      const portPart = window.location.port ? `:${window.location.port}` : ":8766";
+      const lanIp = (data.network && data.network.lan_ip) ? data.network.lan_ip : "127.0.0.1";
+      document.getElementById("lan-url-box").textContent = `http://${lanIp}${portPart}/`;
+
+      document.getElementById("set-headless").checked = Boolean(data.settings.headless);
+      document.getElementById("set-clicks").value = data.settings.max_load_more_clicks || 50;
+
+      // CSV & DB Downloads
+      const csvEmpty = document.getElementById("csv-empty");
+      const csvWrap = document.getElementById("csv-wrap");
+      document.getElementById("btn-csv-dl").style.display = data.exports.latest_csv_exists ? "inline-flex" : "none";
+      document.getElementById("btn-db-dl").style.display = data.database.exists ? "inline-flex" : "none";
+      if (data.exports.latest_csv_exists) {
+        csvEmpty.style.display = "none";
+        csvWrap.style.display = "block";
+        renderCsvTable();
+      } else {
+        csvEmpty.style.display = "block";
+        csvWrap.style.display = "none";
+      }
+
+      // Archives
+      const archives = data.exports.archive_files || [];
+      document.getElementById("archive-list").innerHTML = archives.length === 0
+        ? `<div class="section-desc">過去のCSVアーカイブはまだありません。</div>`
+        : archives.map(a => `
+          <div class="archive-item">
+            <div><strong>${escapeHtml(a.name)}</strong><div class="kpi-sub">${escapeHtml(a.mtime)} / ${escapeHtml(a.size_kb)} KB</div></div>
+            <a class="btn btn-outline btn-sm" href="/api/export/file?name=${encodeURIComponent(a.name)}">ダウンロード</a>
+          </div>
+        `).join("");
+
+      // Log
+      const schedLogBox = document.getElementById("sched-log-box");
+      if (data.logs.exists && data.logs.lines.length > 0) {
+        schedLogBox.textContent = data.logs.lines.join("\n");
+        schedLogBox.scrollTop = schedLogBox.scrollHeight;
+      }
+
+      renderJob(data.job);
+    }
+
+    async function refreshStatus(notify = false) {
+      try {
+        renderStatus(await apiFetch("/api/status"));
+        if (notify) showToast("最新状態に更新しました");
+      } catch (e) { showToast(`更新エラー: ${e.message}`); }
+    }
+
+    async function startBrowserLogin() {
+      try {
+        renderJob((await apiFetch("/api/auth/login", { method: "POST", body: "{}" })).job);
+        showToast("PC画面にログイン用Chromeを開きました");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function importCookie() {
+      const cookie = document.getElementById("cookie-input").value.trim();
+      const skip_verify = document.getElementById("cookie-skip-verify").checked;
+      if (!cookie) return showToast("Cookie値を貼り付けてください");
+      try {
+        const res = await apiFetch("/api/auth/cookie", { method: "POST", body: JSON.stringify({ cookie, skip_verify }) });
+        document.getElementById("cookie-input").value = "";
+        renderJob(res.job);
+        showToast("Cookie検証を開始しました");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function startCredentialsLogin() {
+      const identifier = document.getElementById("auth-identifier").value.trim();
+      const password = document.getElementById("auth-password").value;
+      if (!identifier || !password) return showToast("IDとパスワードを入力してください");
+      try {
+        const res = await apiFetch("/api/auth/credentials", { method: "POST", body: JSON.stringify({ identifier, password }) });
+        document.getElementById("auth-password").value = "";
+        renderJob(res.job);
+        showToast("認証を開始しました");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function clearAuthSession() {
+      if (!confirm("保存済みセッションを削除しますか？")) return;
+      try {
+        await apiFetch("/api/auth/logout", { method: "POST", body: "{}" });
+        showToast("セッションを削除しました");
+        refreshStatus(false);
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function cancelCurrentJob() {
+      try {
+        renderJob((await apiFetch("/api/job/cancel", { method: "POST", body: "{}" })).job);
+        showToast("処理を中断しました");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function runBackup(parseOnly) {
+      const force = document.getElementById("force-backup").checked;
+      try {
+        renderJob((await apiFetch("/api/backup", { method: "POST", body: JSON.stringify({ force, parse_only: parseOnly }) })).job);
+        showToast(parseOnly ? "再生成を開始しました" : "観測を開始しました");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function saveSchedule() {
+      const auto_backup_enabled = document.getElementById("builtin-enabled").checked;
+      const schedule_times = document.getElementById("schedule-times-input").value;
+      try {
+        await apiFetch("/api/schedule", { method: "POST", body: JSON.stringify({ auto_backup_enabled, schedule_mode: "times", schedule_times }) });
+        showToast("定時観測スケジュールを保存しました");
+        refreshStatus(false);
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function saveSettings() {
+      const headless = document.getElementById("set-headless").checked;
+      const max_load_more_clicks = Number(document.getElementById("set-clicks").value || 50);
+      try {
+        await apiFetch("/api/settings", { method: "POST", body: JSON.stringify({ headless, max_load_more_clicks }) });
+        showToast("詳細設定を保存しました");
+        refreshStatus(false);
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function manageScheduler(action) {
+      try {
+        renderJob((await apiFetch("/api/scheduler", { method: "POST", body: JSON.stringify({ action }) })).job);
+        showToast(action === "unregister" ? "タスク解除中です" : "4時刻タスク登録中です");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function generateGithubSecret() {
+      try {
+        const res = await apiFetch("/api/auth/export-b64");
+        const box = document.getElementById("secret-b64-box");
+        box.textContent = res.value;
+        box.style.display = "block";
+        document.getElementById("btn-copy-secret").style.display = "inline-flex";
+        showToast("Secrets用テキストを生成しました");
+      } catch (e) { showToast(e.message); }
+    }
+
+    async function copyTextById(id, msg) {
+      const text = (document.getElementById(id).textContent || "").trim();
+      if (!text || text === "-") return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(msg);
+      } catch (e) { showToast("長押し等でコピーしてください"); }
+    }
+
+    async function openFolder(target) {
+      try {
+        await apiFetch("/api/open-folder", { method: "POST", body: JSON.stringify({ target }) });
+      } catch (e) { showToast(e.message); }
+    }
+
+    refreshStatus(false);
+  </script>
+</body>
+</html>

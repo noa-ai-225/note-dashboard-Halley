@@ -1,0 +1,11 @@
+{
+  "auto_backup_enabled": true,
+  "schedule_mode": "times",
+  "schedule_times": ["09:00", "14:00", "20:00", "23:00"],
+  "sync_interval_hours": 5,
+  "min_safe_interval_hours": 2.0,
+  "headless": true,
+  "max_load_more_clicks": 50,
+  "creator_hint_url": "https://note.com/hurry_room",
+  "safety_valve_description": "9時・14時・20時・23時の定時観測（最短間隔3時間）を確実に実行しつつ過剰アクセスを防ぐため、最低2時間を安全下限としています。"
+}
